@@ -11,6 +11,6 @@ RukbatBitlyBundle is licensed under the GNU GPL v2 - see the `Resources/meta/LIC
 Documentation
 -------------
 
-The bulk of the documentation is stored in the `Resources/doc/index.rst` file in this bundle:
+The bulk of the documentation is stored in the `Resources/doc/index.md` file in this bundle:
 
-[Read the Documentation for master](https://github.com/rukbat/RukbatBitlyBundle/blob/master/Resources/doc/index.rst)
+[Read the Documentation for master](https://github.com/rukbat/RukbatBitlyBundle/blob/master/Resources/doc/index.md)
