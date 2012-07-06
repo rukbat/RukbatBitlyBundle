@@ -72,3 +72,11 @@ Open your controller and call the service.
     $bitly = $this->get('RukbatBitly');
 ?>
 ```
+
+Then you can use one of the methods of RukbatBitly class
+
+``` php
+<?php
+    $result = $bitly->bitly_v3_shorten('http://www.contactlab.com/');
+?>
+```
