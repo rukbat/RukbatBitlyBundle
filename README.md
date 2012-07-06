@@ -11,6 +11,8 @@ RukbatBitlyBundle is licensed under the GNU GPL v2 - see the `Resources/meta/LIC
 Setup
 -----
 
+RukbatBitlyBundle requires [cURL](http://it2.php.net/manual/en/book.curl.php) and [JSON](http://www.php.net/manual/en/book.json.php)
+
 - Using the vendors script
 
 Add to your deps
