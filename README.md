@@ -1,4 +1,4 @@
 RukbatBitlyBundle
 =================
 
-Symfony2 bundle for the **bitly** API (http://dev.bitly.com/api.html).
+Symfony2 bundle for the [bitly](http://dev.bitly.com/api.html) API.
