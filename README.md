@@ -13,9 +13,10 @@ Setup
 
 - Using the vendors script
 
-      [RukbatBitlyBundle]
+```[RukbatBitlyBundle]
           git=https://github.com/rukbat/RukbatBitlyBundle.git
           target=bundles/Rukbat/BitlyBundle
+```
 
 - Add the Rukbat namespace to autoloader
 
@@ -52,7 +53,7 @@ rukbat_bitly:
     clientid: null
     secret: null
 ```
-Visit [http://bitly.com/a/settings/advanced] for more details.
+Visit (bitly doc)[http://bitly.com/a/settings/advanced] for more details.
 
 Usage
 -----
