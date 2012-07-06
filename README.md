@@ -44,7 +44,7 @@ public function registerBundles()
 {
     $bundles = array(
         // ...
-        new Rukbat\BitlyBundle\SOGEnomBundle(),
+        new Rukbat\BitlyBundle\RukbatBitlyBundle(),
     );
 }
 ```
