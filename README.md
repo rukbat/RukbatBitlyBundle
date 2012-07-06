@@ -2,7 +2,7 @@ RukbatBitlyBundle
 =================
 
 Symfony2 bundle for the [bitly](http://dev.bitly.com/api.html) API.
-This bundle wraps the Falicon/BitlyPHP library (https://github.com/Falicon/BitlyPHP) in a Symfony2 bundle.
+This bundle wraps the [Falicon/BitlyPHP](https://github.com/Falicon/BitlyPHP) library in a Symfony2 bundle.
 
 **License**
 
