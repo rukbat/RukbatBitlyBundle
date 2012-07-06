@@ -13,9 +13,10 @@ Setup
 
 - Using the vendors script
 
-```[RukbatBitlyBundle]
-          git=https://github.com/rukbat/RukbatBitlyBundle.git
-          target=bundles/Rukbat/BitlyBundle
+```
+[RukbatBitlyBundle]
+    git=https://github.com/rukbat/RukbatBitlyBundle.git
+    target=bundles/Rukbat/BitlyBundle
 ```
 
 - Add the Rukbat namespace to autoloader
