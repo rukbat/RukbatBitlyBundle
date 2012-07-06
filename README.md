@@ -19,7 +19,7 @@ Add to your deps
 
 ```
 [RukbatBitlyBundle]
-    git=https://github.com/rukbat/RukbatBitlyBundle.git
+    git=git://github.com/rukbat/RukbatBitlyBundle.git
     target=bundles/Rukbat/BitlyBundle
 ```
 
