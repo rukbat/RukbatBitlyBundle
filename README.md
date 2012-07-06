@@ -13,11 +13,15 @@ Setup
 
 - Using the vendors script
 
+Add to your deps
+
 ```
 [RukbatBitlyBundle]
     git=https://github.com/rukbat/RukbatBitlyBundle.git
     target=bundles/Rukbat/BitlyBundle
 ```
+
+and run php bin/vendors install
 
 - Add the Rukbat namespace to autoloader
 
@@ -54,7 +58,7 @@ rukbat_bitly:
     clientid: null
     secret: null
 ```
-Visit (bitly doc)[http://bitly.com/a/settings/advanced] for more details.
+Visit [bitly doc](http://bitly.com/a/settings/advanced) for more details.
 
 Usage
 -----
