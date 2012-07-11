@@ -53,7 +53,7 @@ rukbat_bitly:
     clientid: null
     secret: null
 ```
-Visit [bitly doc](http://bitly.com/a/settings/advanced) for more details.
+Visit [bitly your API key](http://bitly.com/a/your_api_key) for login and key parameters and [bitly doc](http://bitly.com/a/settings/advanced) for more details.
 
 Usage
 -----
