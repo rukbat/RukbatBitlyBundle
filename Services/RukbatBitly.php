@@ -236,7 +236,7 @@ class RukbatBitly
       if (isset($output->{'data'}->{'clicks'})) {
         foreach ($output->{'data'}->{'clicks'} as $tmp) {
           $rec = array();
-          $rec['short_url'] = $tmp->{'short_url'};
+//          $rec['short_url'] = $tmp->{'short_url'};
           $rec['global_hash'] = $tmp->{'global_hash'};
           $rec['user_clicks'] = $tmp->{'user_clicks'};
           $rec['user_hash'] = $tmp->{'user_hash'};
@@ -279,17 +279,17 @@ class RukbatBitly
       $url = $this->bitly_api . "referrers?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
       $output = json_decode($this->bitly_get_curl($url));
       if (isset($output->{'data'}->{'referrers'})) {
-        $results['created_by'] = $output->{'data'}->{'created_by'};
+//        $results['created_by'] = $output->{'data'}->{'created_by'};
         $results['global_hash'] = $output->{'data'}->{'global_hash'};
-        $results['short_url'] = $output->{'data'}->{'short_url'};
+//        $results['short_url'] = $output->{'data'}->{'short_url'};
         $results['user_hash'] = $output->{'data'}->{'user_hash'};
         $results['referrers'] = array();
         foreach ($output->{'data'}->{'referrers'} as $tmp) {
           $rec = array();
           $rec['clicks'] = $tmp->{'clicks'};
           $rec['referrer'] = $tmp->{'referrer'};
-          $rec['referrer_app'] = $tmp->{'referrer_app'};
-          $rec['url'] = $tmp->{'url'};
+//          $rec['referrer_app'] = $tmp->{'referrer_app'};
+//          $rec['url'] = $tmp->{'url'};
           array_push($results['referrers'], $rec);
         }
       }
@@ -327,9 +327,9 @@ class RukbatBitly
       $url = $this->bitly_api . "countries?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
       $output = json_decode($this->bitly_get_curl($url));
       if (isset($output->{'data'}->{'countries'})) {
-        $results['created_by'] = $output->{'data'}->{'created_by'};
+//        $results['created_by'] = $output->{'data'}->{'created_by'};
         $results['global_hash'] = $output->{'data'}->{'global_hash'};
-        $results['short_url'] = $output->{'data'}->{'short_url'};
+//        $results['short_url'] = $output->{'data'}->{'short_url'};
         $results['user_hash'] = $output->{'data'}->{'user_hash'};
         $results['countries'] = array();
         foreach ($output->{'data'}->{'countries'} as $tmp) {
@@ -387,7 +387,7 @@ class RukbatBitly
           $rec = array();
           $rec['clicks'] = $tmp->{'clicks'};
           $rec['global_hash'] = $tmp->{'global_hash'};
-          $rec['short_url'] = $tmp->{'short_url'};
+//          $rec['short_url'] = $tmp->{'short_url'};
           $rec['user_hash'] = $tmp->{'user_hash'};
           array_push($results, $rec);
         }
@@ -441,7 +441,7 @@ class RukbatBitly
         foreach ($output->{'data'}->{'clicks_by_day'} as $tmp) {
           $rec = array();
           $rec['global_hash'] = $tmp->{'global_hash'};
-          $rec['short_url'] = $tmp->{'short_url'};
+//          $rec['short_url'] = $tmp->{'short_url'};
           $rec['user_hash'] = $tmp->{'user_hash'};
           $rec['clicks'] = array();
           $clicks = $tmp->{'clicks'};

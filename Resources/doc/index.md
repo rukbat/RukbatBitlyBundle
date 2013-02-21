@@ -8,7 +8,17 @@ RukbatBitlyBundle requires [cURL](http://it2.php.net/manual/en/book.curl.php) an
 
 - Using the vendors script
 
-Add to your deps
+Add rukbat/bitly-bundle as a dependency in your project's composer.json file:
+
+```
+{
+    "require": {
+        "rukbat/bitly-bundle": "dev-master"
+    }
+}
+```
+
+Or add to your deps
 
 ```
 [RukbatBitlyBundle]
@@ -16,9 +26,9 @@ Add to your deps
     target=bundles/Rukbat/BitlyBundle
 ```
 
-and run php bin/vendors install
+... and run php bin/vendors install
 
-- Add the Rukbat namespace to autoloader
+... and add the Rukbat namespace to autoloader
 
 ``` php
 <?php
