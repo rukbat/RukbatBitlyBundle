@@ -651,12 +651,10 @@ class RukbatBitly
       $params['code'] = $code;
       $params['redirect_uri'] = $redirect;
       $output = $this->bitly_post_curl($url, $params);
-      $parts = explode('&', $output);
-      foreach ($parts as $part) {
-        $bits = explode('=', $part);
-        $results[$bits[0]] = $bits[1];
-      }
 
+      if($output == "INVALID_CODE") return array();
+      parse_str($output, $results);
+      
       return $results;
     }
 
