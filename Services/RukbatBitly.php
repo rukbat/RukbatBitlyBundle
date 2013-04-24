@@ -1017,7 +1017,7 @@ class RukbatBitly {
         $url = $this->bitly_oauth_api."realtime/bursting_phrases?access_token=".$access_token;
         $output = json_decode($this->bitly_get_curl($url));
         if (isset($output->{'data'}->{'phrases'})) {
-            $results['lag'] = $output->{'data'}->{'lag'};
+            $results['current_lag'] = $output->{'data'}->{'current_lag'};
             $results['time'] = $output->{'data'}->{'time'};
             $results['phrases'] = array();
             foreach ($output->{'data'}->{'phrases'} as $phrase) {
