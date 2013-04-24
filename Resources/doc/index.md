@@ -60,6 +60,7 @@ public function registerBundles()
 rukbat_bitly:
     key: yourKey # Required
     login: yourLogin # Required
+    password: null
     clientid: null
     secret: null
 ```

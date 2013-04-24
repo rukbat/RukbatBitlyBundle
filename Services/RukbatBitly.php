@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This class is a wrapper of Falicon/BitlyPHP library.
  * This file is part of the Rukbat/BitlyBundle
@@ -18,51 +19,61 @@
 
 namespace Rukbat\BitlyBundle\Services;
 
-class RukbatBitly
-{
+class RukbatBitly {
+
     /**
      * The bitlyKey assigned to your bit.ly account. (http://bit.ly/a/account)
      */
     private $bitlyKey;
+
     /**
      * The bitlyLogin assigned to your bit.ly account. (http://bit.ly/a/account)
      */
     private $bitlyLogin;
+
+    /**
+     * The bitlyPassword assigned to your bit.ly account. (http://bit.ly/a/account)
+     */
+    private $bitlyPassword;
+
     /**
      * The client_id assigned to your OAuth app. (http://bit.ly/a/account)
      */
     private $bitly_clientid;
+
     /**
      * The client_secret assigned to your OAuth app. (http://bit.ly/a/account)
      */
     private $bitly_secret;
+
     /**
      * The URI of the standard bitly v3 API.
      */
     private $bitly_api;
+
     /**
      * The URI of the bitly OAuth endpoints.
      */
     private $bitly_oauth_api;
+
     /**
      * The URI for OAuth access token requests.
      */
     private $bitly_oauth_access_token;
 
-    public function __construct($key,$login,$clientid,$secret)
-    {
+    public function __construct($key, $login, $password, $clientid, $secret) {
         if (!function_exists('curl_init')) {
             throw new \Exception('This bundle needs the cURL PHP extension.');
         }
 
         $this->bitlyKey = $key;
         $this->bitlyLogin = $login;
+        $this->bitlyPassword = $password;
         $this->bitly_clientid = $clientid;
         $this->bitly_secret = $secret;
         $this->bitly_api = 'http://api.bit.ly/v3/';
         $this->bitly_oauth_api = 'https://api-ssl.bit.ly/v3/';
         $this->bitly_oauth_access_token = 'https://api-ssl.bit.ly/oauth/';
-
     }
 
     /**
@@ -96,26 +107,25 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/shorten
      */
-    public function bitly_v3_shorten($longUrl, $domain = '', $x_login = '', $x_apiKey = '')
-    {
-      $result = array();
-      $url = $this->bitly_api . "shorten?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&longUrl=" . urlencode($longUrl);
-      if ($domain != '') {
-        $url .= "&domain=" . $domain;
-      }
-      if ($x_login != '' && $x_apiKey != '') {
-        $url .= "&x_login=" . $x_login . "&x_apiKey=" . $x_apiKey;
-      }
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'hash'})) {
-        $result['url'] = $output->{'data'}->{'url'};
-        $result['hash'] = $output->{'data'}->{'hash'};
-        $result['global_hash'] = $output->{'data'}->{'global_hash'};
-        $result['long_url'] = $output->{'data'}->{'long_url'};
-        $result['new_hash'] = $output->{'data'}->{'new_hash'};
-      }
+    public function bitly_v3_shorten($longUrl, $domain = '', $x_login = '', $x_apiKey = '') {
+        $result = array();
+        $url = $this->bitly_api."shorten?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&longUrl=".urlencode($longUrl);
+        if ($domain != '') {
+            $url .= "&domain=".$domain;
+        }
+        if ($x_login != '' && $x_apiKey != '') {
+            $url .= "&x_login=".$x_login."&x_apiKey=".$x_apiKey;
+        }
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'hash'})) {
+            $result['url'] = $output->{'data'}->{'url'};
+            $result['hash'] = $output->{'data'}->{'hash'};
+            $result['global_hash'] = $output->{'data'}->{'global_hash'};
+            $result['long_url'] = $output->{'data'}->{'long_url'};
+            $result['new_hash'] = $output->{'data'}->{'new_hash'};
+        }
 
-      return $result;
+        return $result;
     }
 
     /**
@@ -135,38 +145,37 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/expand
      */
-    public function bitly_v3_expand($data)
-    {
-      $results = array();
-      if (is_array($data)) {
-        // we need to flatten this into one proper command
-        $recs = array();
-        foreach ($data as $rec) {
-          $tmp = explode('/', $rec);
-          $tmp = array_reverse($tmp);
-          array_push($recs, $tmp[0]);
+    public function bitly_v3_expand($data) {
+        $results = array();
+        if (is_array($data)) {
+            // we need to flatten this into one proper command
+            $recs = array();
+            foreach ($data as $rec) {
+                $tmp = explode('/', $rec);
+                $tmp = array_reverse($tmp);
+                array_push($recs, $tmp[0]);
+            }
+            $data = implode('&hash=', $recs);
+        } else {
+            $tmp = explode('/', $data);
+            $tmp = array_reverse($tmp);
+            $data = $tmp[0];
         }
-        $data = implode('&hash=', $recs);
-      } else {
-        $tmp = explode('/', $data);
-        $tmp = array_reverse($tmp);
-        $data = $tmp[0];
-      }
-      // make the call to expand
-      $url = $this->bitly_api . "expand?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'expand'})) {
-        foreach ($output->{'data'}->{'expand'} as $tmp) {
-          $rec = array();
-          $rec['hash'] = $tmp->{'hash'};
-          $rec['long_url'] = $tmp->{'long_url'};
-          $rec['user_hash'] = $tmp->{'user_hash'};
-          $rec['global_hash'] = $tmp->{'global_hash'};
-          array_push($results, $rec);
+        // make the call to expand
+        $url = $this->bitly_api."expand?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'expand'})) {
+            foreach ($output->{'data'}->{'expand'} as $tmp) {
+                $rec = array();
+                $rec['hash'] = $tmp->{'hash'};
+                $rec['long_url'] = $tmp->{'long_url'};
+                $rec['user_hash'] = $tmp->{'user_hash'};
+                $rec['global_hash'] = $tmp->{'global_hash'};
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -182,16 +191,15 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/validate
      */
-    public function bitly_v3_validate($x_login, $x_apiKey)
-    {
-      $result = 0;
-      $url = $this->bitly_api . "validate?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&x_login=" . $x_login . "&x_apiKey=" . $x_apiKey;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'valid'})) {
-        $result = $output->{'data'}->{'valid'};
-      }
+    public function bitly_v3_validate($x_login, $x_apiKey) {
+        $result = 0;
+        $url = $this->bitly_api."validate?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&x_login=".$x_login."&x_apiKey=".$x_apiKey;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'valid'})) {
+            $result = $output->{'data'}->{'valid'};
+        }
 
-      return (bool) $result;
+        return (bool) $result;
     }
 
     /**
@@ -214,38 +222,36 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/clicks
      */
-    public function bitly_v3_clicks($data)
-    {
-      $results = array();
-      if (is_array($data)) {
-        // we need to flatten this into one proper command
-        $recs = array();
-        foreach ($data as $rec) {
-          $tmp = explode('/', $rec);
-          $tmp = array_reverse($tmp);
-          array_push($recs, $tmp[0]);
+    public function bitly_v3_clicks($data) {
+        $results = array();
+        if (is_array($data)) {
+            // we need to flatten this into one proper command
+            $recs = array();
+            foreach ($data as $rec) {
+                $tmp = explode('/', $rec);
+                $tmp = array_reverse($tmp);
+                array_push($recs, $tmp[0]);
+            }
+            $data = implode('&hash=', $recs);
+        } else {
+            $tmp = explode('/', $data);
+            $tmp = array_reverse($tmp);
+            $data = $tmp[0];
         }
-        $data = implode('&hash=', $recs);
-      } else {
-        $tmp = explode('/', $data);
-        $tmp = array_reverse($tmp);
-        $data = $tmp[0];
-      }
-      $url = $this->bitly_api . "clicks?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'clicks'})) {
-        foreach ($output->{'data'}->{'clicks'} as $tmp) {
-          $rec = array();
-//          $rec['short_url'] = $tmp->{'short_url'};
-          $rec['global_hash'] = $tmp->{'global_hash'};
-          $rec['user_clicks'] = $tmp->{'user_clicks'};
-          $rec['user_hash'] = $tmp->{'user_hash'};
-          $rec['global_clicks'] = $tmp->{'global_clicks'};
-          array_push($results, $rec);
+        $url = $this->bitly_api."clicks?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'clicks'})) {
+            foreach ($output->{'data'}->{'clicks'} as $tmp) {
+                $rec = array();
+                $rec['global_hash'] = $tmp->{'global_hash'};
+                $rec['user_clicks'] = $tmp->{'user_clicks'};
+                $rec['user_hash'] = $tmp->{'user_hash'};
+                $rec['global_clicks'] = $tmp->{'global_clicks'};
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -270,31 +276,26 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/referrers
      */
-    public function bitly_v3_referrers($data)
-    {
-      $results = array();
-      $tmp = explode('/', $data);
-      $tmp = array_reverse($tmp);
-      $data = $tmp[0];
-      $url = $this->bitly_api . "referrers?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'referrers'})) {
-//        $results['created_by'] = $output->{'data'}->{'created_by'};
-        $results['global_hash'] = $output->{'data'}->{'global_hash'};
-//        $results['short_url'] = $output->{'data'}->{'short_url'};
-        $results['user_hash'] = $output->{'data'}->{'user_hash'};
-        $results['referrers'] = array();
-        foreach ($output->{'data'}->{'referrers'} as $tmp) {
-          $rec = array();
-          $rec['clicks'] = $tmp->{'clicks'};
-          $rec['referrer'] = $tmp->{'referrer'};
-//          $rec['referrer_app'] = $tmp->{'referrer_app'};
-//          $rec['url'] = $tmp->{'url'};
-          array_push($results['referrers'], $rec);
+    public function bitly_v3_referrers($data) {
+        $results = array();
+        $tmp = explode('/', $data);
+        $tmp = array_reverse($tmp);
+        $data = $tmp[0];
+        $url = $this->bitly_api."referrers?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'referrers'})) {
+            $results['global_hash'] = $output->{'data'}->{'global_hash'};
+            $results['user_hash'] = $output->{'data'}->{'user_hash'};
+            $results['referrers'] = array();
+            foreach ($output->{'data'}->{'referrers'} as $tmp) {
+                $rec = array();
+                $rec['clicks'] = $tmp->{'clicks'};
+                $rec['referrer'] = $tmp->{'referrer'};
+                array_push($results['referrers'], $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -318,29 +319,26 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/countries
      */
-    public function bitly_v3_countries($data)
-    {
-      $results = array();
-      $tmp = explode('/', $data);
-      $tmp = array_reverse($tmp);
-      $data = $tmp[0];
-      $url = $this->bitly_api . "countries?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'countries'})) {
-//        $results['created_by'] = $output->{'data'}->{'created_by'};
-        $results['global_hash'] = $output->{'data'}->{'global_hash'};
-//        $results['short_url'] = $output->{'data'}->{'short_url'};
-        $results['user_hash'] = $output->{'data'}->{'user_hash'};
-        $results['countries'] = array();
-        foreach ($output->{'data'}->{'countries'} as $tmp) {
-          $rec = array();
-          $rec['clicks'] = $tmp->{'clicks'};
-          $rec['country'] = $tmp->{'country'};
-          array_push($results['countries'], $rec);
+    public function bitly_v3_countries($data) {
+        $results = array();
+        $tmp = explode('/', $data);
+        $tmp = array_reverse($tmp);
+        $data = $tmp[0];
+        $url = $this->bitly_api."countries?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'countries'})) {
+            $results['global_hash'] = $output->{'data'}->{'global_hash'};
+            $results['user_hash'] = $output->{'data'}->{'user_hash'};
+            $results['countries'] = array();
+            foreach ($output->{'data'}->{'countries'} as $tmp) {
+                $rec = array();
+                $rec['clicks'] = $tmp->{'clicks'};
+                $rec['country'] = $tmp->{'country'};
+                array_push($results['countries'], $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -363,37 +361,35 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/clicks_by_minute
      */
-    public function bitly_v3_clicks_by_minute($data)
-    {
-      $results = array();
-      if (is_array($data)) {
-        // we need to flatten this into one proper command
-        $recs = array();
-        foreach ($data as $rec) {
-          $tmp = explode('/', $rec);
-          $tmp = array_reverse($tmp);
-          array_push($recs, $tmp[0]);
+    public function bitly_v3_clicks_by_minute($data) {
+        $results = array();
+        if (is_array($data)) {
+            // we need to flatten this into one proper command
+            $recs = array();
+            foreach ($data as $rec) {
+                $tmp = explode('/', $rec);
+                $tmp = array_reverse($tmp);
+                array_push($recs, $tmp[0]);
+            }
+            $data = implode('&hash=', $recs);
+        } else {
+            $tmp = explode('/', $data);
+            $tmp = array_reverse($tmp);
+            $data = $tmp[0];
         }
-        $data = implode('&hash=', $recs);
-      } else {
-        $tmp = explode('/', $data);
-        $tmp = array_reverse($tmp);
-        $data = $tmp[0];
-      }
-      $url = $this->bitly_api . "clicks_by_minute?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'clicks_by_minute'})) {
-        foreach ($output->{'data'}->{'clicks_by_minute'} as $tmp) {
-          $rec = array();
-          $rec['clicks'] = $tmp->{'clicks'};
-          $rec['global_hash'] = $tmp->{'global_hash'};
-//          $rec['short_url'] = $tmp->{'short_url'};
-          $rec['user_hash'] = $tmp->{'user_hash'};
-          array_push($results, $rec);
+        $url = $this->bitly_api."clicks_by_minute?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'clicks_by_minute'})) {
+            foreach ($output->{'data'}->{'clicks_by_minute'} as $tmp) {
+                $rec = array();
+                $rec['clicks'] = $tmp->{'clicks'};
+                $rec['global_hash'] = $tmp->{'global_hash'};
+                $rec['user_hash'] = $tmp->{'user_hash'};
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -418,44 +414,42 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/clicks_by_day
      */
-    public function bitly_v3_clicks_by_day($data, $days = 7)
-    {
-      $results = array();
-      if (is_array($data)) {
-        // we need to flatten this into one proper command
-        $recs = array();
-        foreach ($data as $rec) {
-          $tmp = explode('/', $rec);
-          $tmp = array_reverse($tmp);
-          array_push($recs, $tmp[0]);
+    public function bitly_v3_clicks_by_day($data, $days = 7) {
+        $results = array();
+        if (is_array($data)) {
+            // we need to flatten this into one proper command
+            $recs = array();
+            foreach ($data as $rec) {
+                $tmp = explode('/', $rec);
+                $tmp = array_reverse($tmp);
+                array_push($recs, $tmp[0]);
+            }
+            $data = implode('&hash=', $recs);
+        } else {
+            $tmp = explode('/', $data);
+            $tmp = array_reverse($tmp);
+            $data = $tmp[0];
         }
-        $data = implode('&hash=', $recs);
-      } else {
-        $tmp = explode('/', $data);
-        $tmp = array_reverse($tmp);
-        $data = $tmp[0];
-      }
-      $url = $this->bitly_api . "clicks_by_day?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&days=" . $days . "&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'clicks_by_day'})) {
-        foreach ($output->{'data'}->{'clicks_by_day'} as $tmp) {
-          $rec = array();
-          $rec['global_hash'] = $tmp->{'global_hash'};
-//          $rec['short_url'] = $tmp->{'short_url'};
-          $rec['user_hash'] = $tmp->{'user_hash'};
-          $rec['clicks'] = array();
-          $clicks = $tmp->{'clicks'};
-          foreach ($clicks as $click) {
-            $clickrec = array();
-            $clickrec['clicks'] = $click->{'clicks'};
-            $clickrec['day_start'] = $click->{'day_start'};
-            array_push($rec['clicks'], $clickrec);
-          }
-          array_push($results, $rec);
+        $url = $this->bitly_api."clicks_by_day?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&days=".$days."&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'clicks_by_day'})) {
+            foreach ($output->{'data'}->{'clicks_by_day'} as $tmp) {
+                $rec = array();
+                $rec['global_hash'] = $tmp->{'global_hash'};
+                $rec['user_hash'] = $tmp->{'user_hash'};
+                $rec['clicks'] = array();
+                $clicks = $tmp->{'clicks'};
+                foreach ($clicks as $click) {
+                    $clickrec = array();
+                    $clickrec['clicks'] = $click->{'clicks'};
+                    $clickrec['day_start'] = $click->{'day_start'};
+                    array_push($rec['clicks'], $clickrec);
+                }
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -473,17 +467,16 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/bitly_pro_domain
      */
-    public function bitly_v3_bitly_pro_domain($domain)
-    {
-      $result = array();
-      $url = $this->bitly_api . "bitly_pro_domain?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&domain=" . $domain;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'bitly_pro_domain'})) {
-        $result['domain'] = $output->{'data'}->{'domain'};
-        $result['bitly_pro_domain'] = $output->{'data'}->{'bitly_pro_domain'};
-      }
+    public function bitly_v3_bitly_pro_domain($domain) {
+        $result = array();
+        $url = $this->bitly_api."bitly_pro_domain?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&domain=".$domain;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'bitly_pro_domain'})) {
+            $result['domain'] = $output->{'data'}->{'domain'};
+            $result['bitly_pro_domain'] = $output->{'data'}->{'bitly_pro_domain'};
+        }
 
-      return $result;
+        return $result;
     }
 
     /**
@@ -502,35 +495,34 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/lookup
      */
-    public function bitly_v3_lookup($data)
-    {
-      $results = array();
-      if (is_array($data)) {
-        // we need to flatten this into one proper command
-        $recs = array();
-        foreach ($data as $rec) {
-          array_push($recs, urlencode($rec));
+    public function bitly_v3_lookup($data) {
+        $results = array();
+        if (is_array($data)) {
+            // we need to flatten this into one proper command
+            $recs = array();
+            foreach ($data as $rec) {
+                array_push($recs, urlencode($rec));
+            }
+            $data = implode('&url=', $recs);
+        } else {
+            $data = urlencode($data);
         }
-        $data = implode('&url=', $recs);
-      } else {
-        $data = urlencode($data);
-      }
-      $url = $this->bitly_api . "lookup?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&url=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'lookup'})) {
-        foreach ($output->{'data'}->{'lookup'} as $tmp) {
-          $rec = array();
+        $url = $this->bitly_api."lookup?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&url=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'lookup'})) {
+            foreach ($output->{'data'}->{'lookup'} as $tmp) {
+                $rec = array();
 
-          if (!isset($tmp->error)) {
-            $rec['global_hash'] = $tmp->{'global_hash'};
-            $rec['short_url'] = $tmp->{'short_url'};
-            $rec['url'] = $tmp->{'url'};
-          }
-          array_push($results, $rec);
+                if (!isset($tmp->error)) {
+                    $rec['global_hash'] = $tmp->{'global_hash'};
+                    $rec['short_url'] = $tmp->{'short_url'};
+                    $rec['url'] = $tmp->{'url'};
+                }
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -551,24 +543,23 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/authenticate
      */
-    public function bitly_v3_authenticate($x_login, $x_password)
-    {
-      $result = array();
-      $url = $this->bitly_api . "authenticate";
-      $params = array();
-      $params['login'] = $this->bitlyLogin;
-      $params['apiKey'] = $this->bitlyKey;
-      $params['format'] = "json";
-      $params['x_login'] = $x_login;
-      $params['x_password'] = $x_password;
-      $output = json_decode($this->bitly_post_curl($url, $params));
-      if (isset($output->{'data'}->{'authenticate'})) {
-        $result['successful'] = $output->{'data'}->{'authenticate'}->{'successful'};
-        $result['username'] = $output->{'data'}->{'authenticate'}->{'username'};
-        $result['api_key'] = $output->{'data'}->{'authenticate'}->{'api_key'};
-      }
+    public function bitly_v3_authenticate($x_login, $x_password) {
+        $result = array();
+        $url = $this->bitly_api."authenticate";
+        $params = array();
+        $params['login'] = $this->bitlyLogin;
+        $params['apiKey'] = $this->bitlyKey;
+        $params['format'] = "json";
+        $params['x_login'] = $x_login;
+        $params['x_password'] = $x_password;
+        $output = json_decode($this->bitly_post_curl($url, $params));
+        if (isset($output->{'data'}->{'authenticate'})) {
+            $result['successful'] = $output->{'data'}->{'authenticate'}->{'successful'};
+            $result['username'] = $output->{'data'}->{'authenticate'}->{'username'};
+            $result['api_key'] = $output->{'data'}->{'authenticate'}->{'api_key'};
+        }
 
-      return $result;
+        return $result;
     }
 
     /**
@@ -589,39 +580,38 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/info
      */
-    public function bitly_v3_info($data)
-    {
-      $results = array();
-      if (is_array($data)) {
-        // we need to flatten this into one proper command
-        $recs = array();
-        foreach ($data as $rec) {
-          $tmp = explode('/', $rec);
-          $tmp = array_reverse($tmp);
-          array_push($recs, $tmp[0]);
+    public function bitly_v3_info($data) {
+        $results = array();
+        if (is_array($data)) {
+            // we need to flatten this into one proper command
+            $recs = array();
+            foreach ($data as $rec) {
+                $tmp = explode('/', $rec);
+                $tmp = array_reverse($tmp);
+                array_push($recs, $tmp[0]);
+            }
+            $data = implode('&hash=', $recs);
+        } else {
+            $tmp = explode('/', $data);
+            $tmp = array_reverse($tmp);
+            $data = $tmp[0];
         }
-        $data = implode('&hash=', $recs);
-      } else {
-        $tmp = explode('/', $data);
-        $tmp = array_reverse($tmp);
-        $data = $tmp[0];
-      }
-      // make the call to expand
-      $url = $this->bitly_api . "info?login=" . $this->bitlyLogin . "&apiKey=" . $this->bitlyKey . "&format=json&hash=" . $data;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'info'})) {
-        foreach ($output->{'data'}->{'info'} as $tmp) {
-          $rec = array();
-          $rec['created_by'] = $tmp->{'created_by'};
-          $rec['global_hash'] = $tmp->{'global_hash'};
-          $rec['hash'] = $tmp->{'hash'};
-          $rec['title'] = $tmp->{'title'};
-          $rec['user_hash'] = $tmp->{'user_hash'};
-          array_push($results, $rec);
+        // make the call to expand
+        $url = $this->bitly_api."info?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'info'})) {
+            foreach ($output->{'data'}->{'info'} as $tmp) {
+                $rec = array();
+                $rec['created_by'] = $tmp->{'created_by'};
+                $rec['global_hash'] = $tmp->{'global_hash'};
+                $rec['hash'] = $tmp->{'hash'};
+                $rec['title'] = $tmp->{'title'};
+                $rec['user_hash'] = $tmp->{'user_hash'};
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -641,25 +631,43 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/oauth/access_token
      */
-    public function bitly_oauth_access_token($code, $redirect)
-    {
-      $results = array();
-      $url = $this->bitly_oauth_access_token . "access_token";
-      $params = array();
-      $params['client_id'] = $this->bitly_clientid;
-      $params['client_secret'] = $this->bitly_secret;
-      $params['code'] = $code;
-      $params['redirect_uri'] = $redirect;
-      $output = $this->bitly_post_curl($url, $params);
-      $parts = explode('&', $output);
-      foreach ($parts as $part) {
-        if (false !== strpos($part, "=")) {
-          $bits = explode('=', $part);
-          $results[$bits[0]] = $bits[1];
+    public function bitly_oauth_access_token($code, $redirect) {
+        $results = array();
+        $url = $this->bitly_oauth_access_token."access_token";
+        $params = array();
+        $params['client_id'] = $this->bitly_clientid;
+        $params['client_secret'] = $this->bitly_secret;
+        $params['code'] = $code;
+        $params['redirect_uri'] = $redirect;
+        $output = $this->bitly_post_curl($url, $params);
+        $parts = explode('&', $output);
+        foreach ($parts as $part) {
+            if (false !== strpos($part, "=")) {
+                $bits = explode('=', $part);
+                $results[$bits[0]] = $bits[1];
+            }
         }
-      }
 
-      return $results;
+        return $results;
+    }
+
+    /**
+     * Returns an OAuth access token as well as API users.
+     *
+     * @return
+     *   String access_token: The OAuth access token for specified user.
+     *
+     * @see http://dev.bitly.com/authentication.html
+     */
+    public function bitly_oauth_basic_access_token() {
+        $url = $this->bitly_oauth_access_token."access_token";
+        $headers = array();
+        $headers[] = 'Authorization: Basic '.base64_encode($this->bitlyLogin.':'.$this->bitlyPassword);
+        $params = array();
+        $params['client_id'] = $this->bitly_clientid;
+        $params['client_secret'] = $this->bitly_secret;
+
+        return $this->bitly_post_curl($url, $params, $headers);
     }
 
     /**
@@ -682,25 +690,23 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/user/clicks
      */
-    public function bitly_v3_user_clicks($access_token, $days = 7)
-    {
-      // $results = bitly_v3_user_clicks('BITLY_SUPPLIED_ACCESS_TOKEN');
-      $results = array();
-      $url = $this->bitly_oauth_api . "user/clicks?access_token=" . $access_token . "&days=" . $days;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'clicks'})) {
-        $results['days'] = $output->{'data'}->{'days'};
-        $results['total_clicks'] = $output->{'data'}->{'total_clicks'};
-        $results['clicks'] = array();
-        foreach ($output->{'data'}->{'clicks'} as $clicks) {
-          $rec = array();
-          $rec['clicks'] = $clicks->{'clicks'};
-          $rec['day_start'] = $clicks->{'day_start'};
-          array_push($results['clicks'], $rec);
+    public function bitly_v3_user_clicks($access_token, $days = 7) {
+        $results = array();
+        $url = $this->bitly_oauth_api."user/clicks?access_token=".$access_token."&days=".$days;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'clicks'})) {
+            $results['days'] = $output->{'data'}->{'days'};
+            $results['total_clicks'] = $output->{'data'}->{'total_clicks'};
+            $results['clicks'] = array();
+            foreach ($output->{'data'}->{'clicks'} as $clicks) {
+                $rec = array();
+                $rec['clicks'] = $clicks->{'clicks'};
+                $rec['day_start'] = $clicks->{'day_start'};
+                array_push($results['clicks'], $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -722,28 +728,26 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/user/referrers
      */
-    public function bitly_v3_user_referrers($access_token, $days = 7)
-    {
-      // $results = bitly_v3_user_referrers('BITLY_SUPPLIED_ACCESS_TOKEN');
-      $results = array();
-      $url = $this->bitly_oauth_api . "user/referrers?access_token=" . $access_token . "&days=" . $days;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'referrers'})) {
-        $results['days'] = $output->{'data'}->{'days'};
-        $results['referrers'] = array();
-        foreach ($output->{'data'}->{'referrers'} as $referrers) {
-          $recs = array();
-          foreach ($referrers as $ref) {
-            $rec = array();
-            $rec['referrer'] = $ref->{'referrer'};
-            $rec['clicks'] = $ref->{'clicks'};
-            array_push($recs, $rec);
-          }
-          array_push($results['referrers'], $recs);
+    public function bitly_v3_user_referrers($access_token, $days = 7) {
+        $results = array();
+        $url = $this->bitly_oauth_api."user/referrers?access_token=".$access_token."&days=".$days;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'referrers'})) {
+            $results['days'] = $output->{'data'}->{'days'};
+            $results['referrers'] = array();
+            foreach ($output->{'data'}->{'referrers'} as $referrers) {
+                $recs = array();
+                foreach ($referrers as $ref) {
+                    $rec = array();
+                    $rec['referrer'] = $ref->{'referrer'};
+                    $rec['clicks'] = $ref->{'clicks'};
+                    array_push($recs, $rec);
+                }
+                array_push($results['referrers'], $recs);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -765,28 +769,26 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/user/countries
      */
-    public function bitly_v3_user_countries($access_token, $days = 7)
-    {
-      // $results = bitly_v3_user_countries('BITLY_SUPPLIED_ACCESS_TOKEN');
-      $results = array();
-      $url = $this->bitly_oauth_api . "user/countries?access_token=" . $access_token . "&days=" . $days;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'countries'})) {
-        $results['days'] = $output->{'data'}->{'days'};
-        $results['countries'] = array();
-        foreach ($output->{'data'}->{'countries'} as $countries) {
-          $recs = array();
-          foreach ($countries as $country) {
-            $rec = array();
-            $rec['country'] = $country->{'country'};
-            $rec['clicks'] = $country->{'clicks'};
-            array_push($recs, $rec);
-          }
-          array_push($results['countries'], $recs);
+    public function bitly_v3_user_countries($access_token, $days = 7) {
+        $results = array();
+        $url = $this->bitly_oauth_api."user/countries?access_token=".$access_token."&days=".$days;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'countries'})) {
+            $results['days'] = $output->{'data'}->{'days'};
+            $results['countries'] = array();
+            foreach ($output->{'data'}->{'countries'} as $countries) {
+                $recs = array();
+                foreach ($countries as $country) {
+                    $rec = array();
+                    $rec['country'] = $country->{'country'};
+                    $rec['clicks'] = $country->{'clicks'};
+                    array_push($recs, $rec);
+                }
+                array_push($results['countries'], $recs);
+            }
         }
-      }
 
-      return $results;
+        return $results;
     }
 
     /**
@@ -803,22 +805,401 @@ class RukbatBitly
      *
      * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/user/realtime_links
      */
-    public function bitly_v3_user_realtime_links($access_token)
-    {
-      // $results = bitly_v3_user_realtime_links('BITLY_SUPPLIED_ACCESS_TOKEN');
-      $results = array();
-      $url = $this->bitly_oauth_api . "user/realtime_links?format=json&access_token=" . $access_token;
-      $output = json_decode($this->bitly_get_curl($url));
-      if (isset($output->{'data'}->{'realtime_links'})) {
-        foreach ($output->{'data'}->{'realtime_links'} as $realtime_links) {
-          $rec = array();
-          $rec['clicks'] = $realtime_links->{'clicks'};
-          $rec['user_hash'] = $realtime_links->{'user_hash'};
-          array_push($results, $rec);
+    public function bitly_v3_user_realtime_links($access_token) {
+        $results = array();
+        $url = $this->bitly_oauth_api."user/realtime_links?format=json&access_token=".$access_token;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'realtime_links'})) {
+            foreach ($output->{'data'}->{'realtime_links'} as $realtime_links) {
+                $rec = array();
+                $rec['clicks'] = $realtime_links->{'clicks'};
+                $rec['user_hash'] = $realtime_links->{'user_hash'};
+                array_push($results, $rec);
+            }
         }
-      }
 
-      return $results;
+        return $results;
+    }
+
+    /**
+     * Returns entries from a user's link history in reverse chronological order.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *   A multidimensional numbered associative array containing:
+     *   - link - the bitly link specific to this user and this long_url.
+     *   - aggregate_link - the global bitly identifier for this long_url.
+     *   - long_url - the original long URL.
+     *   - archived - a true/false value indicating whether the user has archived this link.
+     *   - private - a true/false value indicating whether the user has made this link private.
+     *   - created_at - an integer unix epoch indicating when this link was shortened/encoded.
+     *   - user_ts - a user-provided timestamp for when this link was shortened/encoded, used for backfilling data.
+     *   - modified_at - an integer unix epoch indicating when this link's metadata was last edited.
+     *   - title - the title for this link.
+     *
+     * @see http://dev.bitly.com/user_info.html#v3_user_link_history
+     */
+    function bitly_v3_user_link_history($access_token) {
+        $results = array();
+        $url = $this->bitly_oauth_api."user/link_history?format=json&access_token=".$access_token;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'link_history'})) {
+            foreach ($output->{'data'}->{'link_history'} as $link_history) {
+                $rec = array();
+                $rec['aggregate_link'] = $link_history->{'aggregate_link'};
+                $rec['archived'] = $link_history->{'archived'};
+                $rec['client_id'] = $link_history->{'client_id'};
+                $rec['created_at'] = $link_history->{'created_at'};
+                $rec['link'] = $link_history->{'link'};
+                $rec['long_url'] = $link_history->{'long_url'};
+                $rec['modified_at'] = $link_history->{'modified_at'};
+                $rec['private'] = $link_history->{'private'};
+                $rec['title'] = $link_history->{'title'};
+                $rec['user_ts'] = $link_history->{'user_ts'};
+                array_push($results, $rec);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns a specified number of "high-value" bitly links that are popular
+     * across bitly at this particular moment.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @param $limit
+     *   the maxiumum number of high-value links to return.
+     *
+     * @return
+     *   An array of bit.ly links
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    public function bitly_v3_highvalue($access_token, $limit = 5) {
+        $results = array();
+        $url = $this->bitly_oauth_api."highvalue?access_token=".$access_token."&limit=".$limit;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'values'})) {
+            foreach ($output->{'data'}->{'values'} as $link) {
+                array_push($results, $link);
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Search links receiving clicks across bitly by content, language, location, and more.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @param $query
+     *   string to query for
+     *
+     * @param $limit
+     *   the maximum number of links to return.
+     *
+     * @param $offset
+     *   which result to start with (defaults to 0)
+     *
+     * @param $domain
+     *   restrict results to this web domain
+     *
+     * @param $lang
+     *   favor results in this language (two letter ISO code)
+     *
+     * @param $cities
+     *   show links active in this city (ordered like country-state-city, e.g. us-il-chicago)
+     *
+     * @param $fields
+     *   which fields to return in the response (comma-separated).
+     *   May be any of: domain, initial_epoch, h2, h3, site, lastindexed, keywords,
+     *   last_indexed_epoch, title, initial, summaryText, content, score, summaryTitle,
+     *    type, description, cities, lang, url, referrer, aggregate_link, lastseen, page,
+     *    ogtitle aggregate_link. By default, all will be returned.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_search($access_token, $query, $limit = 10, $offset = 0, $domain = '', $lang = '', $cities = '', $fields = array()) {
+        $results = array();
+        $url = $this->bitly_oauth_api."search?access_token=".$access_token."&query=".urlencode($query)."&limit=".$limit."&offset=".$offset;
+        if ($domain != '') {
+            $url .= '&domain='.urlencode($domain);
+        }
+        if ($lang != '') {
+            $url .= '&lang='.urlencode($lang);
+        }
+        if ($cities != '') {
+            $url .= '&cities='.urlencode($cities);
+        }
+        if (!empty($fields)) {
+            # only return certain fields
+            $url .= '&fields='.implode(',', $fields);
+        }
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'results'})) {
+            foreach ($output->{'data'}->{'results'} as $result) {
+                $res = array();
+                foreach ($result as $key => $val) {
+                    $res[$key] = $val;
+                }
+                array_push($results, $res);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns phrases that are receiving an uncharacteristically high volume of
+     * click traffic, and the individual links (hashes) driving traffic to pages
+     * containing these phrases.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_realtime_bursting_phrases($access_token) {
+        $results = array();
+        $url = $this->bitly_oauth_api."realtime/bursting_phrases?access_token=".$access_token;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'phrases'})) {
+            foreach ($output->{'data'}->{'phrases'} as $phrase) {
+                $res = array();
+                $res['std'] = $phrase->{'std'};
+                $res['ghashes'] = array();
+                foreach ($phrase->{'ghashes'} as $ghashes) {
+                    $temp = array();
+                    $temp['visitors'] = $ghashes->{'visitors'};
+                    $temp['ghash'] = $ghashes->{'ghash'};
+                    array_push($res['ghashes'], $temp);
+                }
+                $res['N'] = $phrase->{'N'};
+                $res['rate'] = $phrase->{'rate'};
+                $res['urls'] = array();
+                foreach ($phrase->{'urls'} as $urls) {
+                    $temp = array();
+                    $temp['visitors'] = $urls->{'visitors'};
+                    $temp['aggregate_url'] = $urls->{'aggregate_url'};
+                    array_push($res['urls'], $temp);
+                }
+                $res['phrase'] = $phrase->{'phrase'};
+                $res['mean'] = $phrase->{'mean'};
+                array_push($results, $res);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns phrases that are receiving a consistently high volume of click
+     * traffic, and the individual links (hashes) driving traffic to pages
+     * containing these phrases.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_realtime_hot_phrases($access_token) {
+        $results = array();
+        $url = $this->bitly_oauth_api."realtime/bursting_phrases?access_token=".$access_token;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'phrases'})) {
+            $results['lag'] = $output->{'data'}->{'lag'};
+            $results['time'] = $output->{'data'}->{'time'};
+            $results['phrases'] = array();
+            foreach ($output->{'data'}->{'phrases'} as $phrase) {
+                $res = array();
+                $res['phrase'] = $phrase->{'phrase'};
+                $res['rate'] = $phrase->{'rate'};
+                $res['ghashes'] = array();
+                foreach ($phrase->{'ghashes'} as $ghashes) {
+                    $temp = array();
+                    $temp['visitors'] = $ghashes->{'visitors'};
+                    $temp['ghash'] = $ghashes->{'ghash'};
+                    array_push($res['ghashes'], $temp);
+                }
+                array_push($results['phrases'], $res);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the click rate for content containing a specified phrase.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_realtime_clickrate($access_token, $phrase) {
+        $results = array();
+        $url = $this->bitly_oauth_api."realtime/clickrate?access_token=".$access_token."&phrase=".urlencode($phrase);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'phrase'})) {
+            $results['phrase'] = $output->{'data'}->{'phrase'};
+            $results['rate'] = $output->{'data'}->{'rate'};
+            $results['lag'] = $output->{'data'}->{'lag'};
+            $results['time'] = $output->{'data'}->{'time'};
+        }
+        return $results;
+    }
+
+    /**
+     * Returns metadata about a single bitly link.
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_link_info($access_token, $link) {
+        $results = array();
+        $url = $this->bitly_oauth_api."link/info?access_token=".$access_token."&link=".urlencode($link);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'original_url'})) {
+            foreach ($output->{'data'} as $key => $val) {
+                if (!is_array($val)) {
+                    $results[$key] = $val;
+                }
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the “main article” from the linked page, as determined by the
+     * content extractor, in either HTML or plain text format
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_link_content($access_token, $link) {
+        $results = array();
+        $url = $this->bitly_oauth_api."link/content?access_token=".$access_token."&link=".urlencode($link);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'content'})) {
+            $results['content'] = $output->{'data'}->{'content'};
+            $results['content_type'] = $output->{'data'}->{'content_type'};
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the detected categories for a document, in descending order of
+     * confidence
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_link_category($access_token, $link) {
+        $results = array();
+        $url = $this->bitly_oauth_api."link/category?access_token=".$access_token."&link=".urlencode($link);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'categories'})) {
+            foreach ($output->{'data'}->{'categories'} as $category) {
+                array_push($results, $category);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the "social score" for a specified bitly link
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *   An associative array
+     *     - The key is the link
+     *     - The value is the score
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_link_social($access_token, $link) {
+        $results = array();
+        $url = $this->bitly_oauth_api."link/social?access_token=".$access_token."&link=".urlencode($link);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'social_scores'})) {
+            foreach ($output->{'data'}->{'social_scores'} as $key => $val) {
+                $results[$key] = $val;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the significant locations for the bitly link or None if locations do not exist
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *   An array of locations
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_link_location($access_token, $link) {
+        $results = array();
+        $url = $this->bitly_oauth_api."link/location?access_token=".$access_token."&link=".urlencode($link);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'locations'})) {
+            foreach ($output->{'data'}->{'locations'} as $location) {
+                array_push($results, $location);
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the significant languages for the bitly link
+     *
+     * @param $access_token
+     *   The OAuth access token for the user.
+     *
+     * @return
+     *   An associative array containing
+     *   - the link as the key
+     *   - the language as the value
+     *
+     * @see http://dev.bitly.com/data_apis.html
+     */
+    function bitly_v3_link_language($access_token, $link) {
+        $results = array();
+        $url = $this->bitly_oauth_api."link/language?access_token=".$access_token."&link=".urlencode($link);
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->{'data'}->{'languages'})) {
+            foreach ($output->{'data'}->{'languages'} as $key => $val) {
+                $results[$key] = $val;
+            }
+        }
+        return $results;
     }
 
     /**
@@ -827,22 +1208,22 @@ class RukbatBitly
      * @param $uri
      *   URI to call.
      */
-    public function bitly_get_curl($uri)
-    {
-      $output = "";
-      try {
-        $ch = curl_init($uri);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        $output = curl_exec($ch);
-      } catch (Exception $e) {
-      }
+    public function bitly_get_curl($uri) {
+        $output = "";
+        try {
+            $ch = curl_init($uri);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            $output = curl_exec($ch);
+        } catch (Exception $e) {
 
-      return $output;
+        }
+
+        return $output;
     }
 
     /**
@@ -852,30 +1233,35 @@ class RukbatBitly
      *   URI to call.
      * @param $fields
      *   Array of fields to send.
+     * @param $headers
+     *   Array with additional headers.
      */
-    public function bitly_post_curl($uri, $fields)
-    {
-      $output = "";
-      $fields_string = "";
-      foreach ($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
-      rtrim($fields_string,'&');
-      try {
-        $ch = curl_init($uri);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch,CURLOPT_POST,count($fields));
-        curl_setopt($ch,CURLOPT_POSTFIELDS,$fields_string);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        $output = curl_exec($ch);
-      } catch (Exception $e) {
-      }
+    public function bitly_post_curl($uri, $fields, array $headers = array()) {
+        $output = "";
+        $fields_string = "";
+        foreach ($fields as $key => $value) {
+            $fields_string .= $key.'='.$value.'&';
+        }
+        rtrim($fields_string, '&');
+        try {
+            $ch = curl_init($uri);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            if (!empty($headers)) {
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            }
+            curl_setopt($ch, CURLOPT_POST, count($fields));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            $output = curl_exec($ch);
+        } catch (Exception $e) {
 
-      return $output;
+        }
+
+        return $output;
     }
 
 }
-
-
