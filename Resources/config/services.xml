@@ -7,6 +7,7 @@
     <parameters>
         <parameter key="rukbat_bitly.key">null</parameter>
         <parameter key="rukbat_bitly.login">null</parameter>
+        <parameter key="rukbat_bitly.password">null</parameter>
         <parameter key="rukbat_bitly.clientid">null</parameter>
         <parameter key="rukbat_bitly.secret">null</parameter>
         <parameter key="rukbat_bitly.rukbatbitly.service.class">Rukbat\BitlyBundle\Services\RukbatBitly</parameter>
@@ -16,10 +17,10 @@
         <service id="RukbatBitly" class="%rukbat_bitly.rukbatbitly.service.class%">
             <argument>%rukbat_bitly.key%</argument>
             <argument>%rukbat_bitly.login%</argument>
+            <argument>%rukbat_bitly.password%</argument>
             <argument>%rukbat_bitly.clientid%</argument>
             <argument>%rukbat_bitly.secret%</argument>
         </service>
     </services>
 
 </container>
-
