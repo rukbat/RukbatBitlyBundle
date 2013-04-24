@@ -684,7 +684,7 @@ class RukbatBitly {
      * @return
      *   Array contains "high-value" links
      *
-     * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/user/clicks
+     * @see http://dev.bitly.com/data_apis.html#v3_highvalue
      */
     public function bitly_v3_highvalue($access_token, $days = 7, $limit = 10) {
         $results = array();
