@@ -1,6 +1,8 @@
 RukbatBitlyBundle
 =================
 
+[![Latest Stable Version](https://poser.pugx.org/rukbat/bitly-bundle/v/stable.png)](https://packagist.org/packages/rukbat/bitly-bundle) [![Total Downloads](https://poser.pugx.org/rukbat/bitly-bundle/downloads.png)](https://packagist.org/packages/rukbat/bitly-bundle)
+
 Symfony2 bundle for the [bitly](http://dev.bitly.com/api.html) API.
 This bundle wraps the [Falicon/BitlyPHP](https://github.com/Falicon/BitlyPHP) library in a Symfony2 bundle.
 
