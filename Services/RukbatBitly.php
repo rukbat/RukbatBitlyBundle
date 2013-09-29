@@ -242,12 +242,7 @@ class RukbatBitly {
         $output = json_decode($this->bitly_get_curl($url));
         if (isset($output->{'data'}->{'clicks'})) {
             foreach ($output->{'data'}->{'clicks'} as $tmp) {
-                $rec = array();
-                $rec['global_hash'] = $tmp->{'global_hash'};
-                $rec['user_clicks'] = $tmp->{'user_clicks'};
-                $rec['user_hash'] = $tmp->{'user_hash'};
-                $rec['global_clicks'] = $tmp->{'global_clicks'};
-                array_push($results, $rec);
+                array_push($results, $tmp);
             }
         }
 
