@@ -221,6 +221,7 @@ class RukbatBitly {
      *     or hash. An example error is "NOT_FOUND"
      *
      * @see http://dev.bitly.com/deprecated.html#v3_clicks
+     * @deprecated Note: this is deprecated in favor of bitly_v3_link_clicks
      */
     public function bitly_v3_clicks($data) {
         $results = array();
@@ -240,9 +241,13 @@ class RukbatBitly {
         }
         $url = $this->bitly_api."clicks?login=".$this->bitlyLogin."&apiKey=".$this->bitlyKey."&format=json&hash=".$data;
         $output = json_decode($this->bitly_get_curl($url));
-        if (isset($output->{'data'}->{'clicks'})) {
-            foreach ($output->{'data'}->{'clicks'} as $tmp) {
-                array_push($results, $tmp);
+        if (isset($output->data->clicks)) {
+            foreach ($output->data->clicks as $tmp) {
+                $result = array();
+                foreach($tmp as $key => $value) {
+                    $result[$key] = $value;
+                }
+                array_push($results, $result);
             }
         }
 
@@ -1192,6 +1197,42 @@ class RukbatBitly {
         if (isset($output->{'data'}->{'languages'})) {
             foreach ($output->{'data'}->{'languages'} as $key => $val) {
                 $results[$key] = $val;
+            }
+        }
+        return $results;
+    }
+
+    /**
+     * Returns the number of clicks on a single bitly link.
+     * 
+     * @param string $access_token
+     * @param string $link a bitly link.
+     * @param string $unit minute, hour, day, week or month, default: day
+     *   Note: when unit is minute the maximum value for units is 60.
+     * @param int $units an integer representing the time units to query data for. Pass -1 to return all units of time.
+     * @param string $timezone an integer hour offset from UTC (-14 to 14), or a timezone string default: America/New_York.
+     * @param string $rollup true or false. Return data for multiple units rolled up to a single result instead of a separate value for each period of time.
+     * @param int $limit 1 to 1000 (default=100).
+     * @param string $unit_reference_ts an epoch timestamp, indicating the most recent time for which to pull metrics, default: now.
+     *   Note: the value of unit_reference_ts rounds to the nearest unit.
+     *   Note: historical data is stored hourly beyond the most recent 60 minutes. If a unit_reference_ts is specified, unit cannot be minute.
+     * 
+     * @return An associative array containing
+     * - link_clicks: the number of clicks on the specified bitly link.
+     * - tz_offset: the offset for the specified timezone, in hours.
+     * - unit: an echo of the specified unit value.
+     * - units: an echo of the specified units value.
+     * - unit_reference_ts: an echo of the specified unit_reference_ts value.
+     * 
+     * @see http://dev.bitly.com/link_metrics.html#v3_link_clicks
+     */
+    function bitly_v3_link_clicks($access_token, $link, $unit = 'day', $units = -1, $timezone = "America/New_York", $rollup = 'true', $limit = 100, $unit_reference_ts = 'now') {
+        $results = array();
+        $url = $this->bitly_oauth_api.'link/clicks?access_token=' . $access_token . '&link=' . urlencode($link) . '&unit=' . $unit . '&units=' . $units . '&timezone=' . $timezone . '&rollup=' . $rollup . '&limit=' . $limit . '&unit_reference_ts=' . $unit_reference_ts;
+        $output = json_decode($this->bitly_get_curl($url));
+        if (isset($output->data) && $output->data != '') {
+            foreach($output->data as $key => $value) {
+                $results[$key] = $value;
             }
         }
         return $results;
