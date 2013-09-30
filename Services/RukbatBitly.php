@@ -203,24 +203,24 @@ class RukbatBitly {
     }
 
     /**
-     * For one or more bit.ly URL's or hashes, returns statistics about the clicks
-     * on that link.
+     * For one or more bit.ly URL's or hashes, returns the daily timeseries clicks 
+     * for a given bitly link
      *
-     * @param $data
-     *   Can be a bit.ly shortened URL, a bit.ly hash, or an array of bit.ly URLs
-     *   and/or hashes.
+     * @param $data can be a bit.ly shortened URL, a bit.ly hash, or an array of bit.ly URLs and/or hashes.
      *
      * @return
      *   A multidimensional numbered associative array containing:
-     *   - short_url: The unique bit.ly hash.
-     *   - global_hash: A bit.ly identifier for long_url which can be used to track
-     *     aggregate stats across all matching bit.ly links.
-     *   - user_clicks: The total count of clicks to this user's bit.ly link.
-     *   - user_hash: The corresponding bit.ly user identifier.
-     *   - global_clicks: The total count of clicks to all bit.ly links that point
-     *     to the same same long url.
+     *   - short_url: this matches the shortUrl request parameter.
+     *   - hash: this matches the hash request parameter.
+     *   - user_hash: is the corresponding bitly user identifier.
+     *   - global_hash: is the corresponding bitly aggregate identifier.
+     *   - user_clicks: this is the total count of clicks to this user's bitly link.
+     *   - global_clicks: this is the total count of clicks to all bitly links that 
+     *     point to the same same long url.
+     *   - error: indicates there was an error retrieving data for a given shortUrl 
+     *     or hash. An example error is "NOT_FOUND"
      *
-     * @see http://code.google.com/p/bitly-api/wiki/ApiDocumentation#/v3/clicks
+     * @see http://dev.bitly.com/deprecated.html#v3_clicks
      */
     public function bitly_v3_clicks($data) {
         $results = array();
