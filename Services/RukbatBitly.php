@@ -1255,7 +1255,7 @@ class RukbatBitly {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
             $output = curl_exec($ch);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
         }
 
@@ -1293,7 +1293,7 @@ class RukbatBitly {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
             $output = curl_exec($ch);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
 
         }
 
