@@ -1,7 +1,9 @@
 RukbatBitlyBundle
 =================
 
-[![Latest Stable Version](https://poser.pugx.org/rukbat/bitly-bundle/v/stable.png)](https://packagist.org/packages/rukbat/bitly-bundle) [![Total Downloads](https://poser.pugx.org/rukbat/bitly-bundle/downloads.png)](https://packagist.org/packages/rukbat/bitly-bundle)
+[![Latest Stable Version](https://poser.pugx.org/rukbat/bitly-bundle/v/stable.png)](https://packagist.org/packages/rukbat/bitly-bundle) 
+[![Total Downloads](https://poser.pugx.org/rukbat/bitly-bundle/downloads.png)](https://packagist.org/packages/rukbat/bitly-bundle) 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/3f8426ee-8a42-40e7-ae8f-9f613275fd5b/mini.png)](https://insight.sensiolabs.com/projects/3f8426ee-8a42-40e7-ae8f-9f613275fd5b)
 
 Symfony2 bundle for the [bitly](http://dev.bitly.com/api.html) API.
 This bundle wraps the [Falicon/BitlyPHP](https://github.com/Falicon/BitlyPHP) library in a Symfony2 bundle.
