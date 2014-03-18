@@ -6,7 +6,7 @@ This bundle wraps the `Falicon/BitlyPHP <https://github.com/Falicon/BitlyPHP>`_ 
 
 **License**
 
-RukbatBitlyBundle is licensed under the MIT LIcense - see the `Resources/meta/LICENSE <https://github.com/rukbat/RukbatBitlyBundle/blob/master/Resources/meta/LICENSE>`_ file for details
+RukbatBitlyBundle is licensed under the MIT License - see the `Resources/meta/LICENSE <https://github.com/rukbat/RukbatBitlyBundle/blob/master/Resources/meta/LICENSE>`_ file for details
 
 Documentation
 -------------
